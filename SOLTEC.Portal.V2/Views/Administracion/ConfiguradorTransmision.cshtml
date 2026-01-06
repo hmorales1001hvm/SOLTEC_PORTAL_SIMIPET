@@ -1,0 +1,215 @@
+﻿@{
+    ViewData["Title"] = "Configurador de Transmisiones";
+    // Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<!DOCTYPE html>
+<html lang="es">
+
+<body>
+    <form class="col s12" id="frmDatos" autocomplete="off">
+        <input type="hidden" id="apiBaseUrl" value="@ViewBag.ApiBaseUrl" />
+        <input type="hidden" id="txtUsuario" value="@User.FindFirst("IdUsuario")?.Value" />
+
+        <h5>Listado de Transmisiones</h5>
+        <div class="container-fluid">
+            <div class="card z-depth-2">
+                <div class="card-content">
+
+                    <div class="row" style="margin-bottom: 0;">
+                        <div class="input-field col s12 m4" id="divEmpresa">
+                            <select id="cboEmpresa">
+                                <option value="0" disabled selected>Seleccione empresa</option>
+
+                            </select>
+                            <label>Empresa</label>
+                        </div>
+
+                        <!-- Tipo de transmisión -->
+                        <div class="input-field col s12 m4">
+                            <select id="cboTipo">
+                                <option value="0" disabled selected>Seleccione tipo</option>
+
+                            </select>
+                            <label>Tipo de Transmisión</label>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="col s12 m4 right-align" style="margin-top: 20px;">
+                            <a href="#!" id="btnBuscar" class="btn blue darken-2 waves-effect waves-light">
+                                <i class="material-icons left">search</i>Buscar
+                            </a>
+                            <a href="#!" id="btnAgregar" class="btn green">
+                                <i class="material-icons left">add</i>Agregar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DETALLE -->
+                <div class="card-content">
+                    <table class="striped highlight dataTables_wrapper" id="tblTransmisiones">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Identificador</th>
+                                <th>Tipo</th>
+                                <th>Nombre del Usuario</th>
+                                <th style="text-align:center!important">Periodo</th>
+                                <th style="text-align:center!important"> Vigencia</th>
+                                <th style="text-align:center!important">Activo</th>
+                                <th style="text-align:center!important">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+    </form>
+
+
+    <div id="modalDetalle" class="modal modal-fixed-footer custom-modal">
+        <!-- Botón flotante de cerrar (fuera del card) -->
+        <a href="#!" class="btn-floating btn-large red modal-close z-depth-3 modal-close-btn">
+            <i class="material-icons">close</i>
+        </a>
+
+        <!-- Contenido del modal -->
+        <div class="modal-content">
+            <div class="card z-depth-2 grey lighten-4" style="padding: 20px; border-radius: 8px;">
+                <span class="card-title">Agregar</span>
+                <hr />
+
+                <div class="row valign-wrapper" style="margin-bottom:0;">
+                    <!-- Empresa -->
+                    <div class="col s12 m3">
+                        <div class="input-field">
+                            <select id="cboEmpresaDetalle" class="validate" required>
+                                <option value="" disabled selected>Seleccione empresa</option>
+                            </select>
+                            <label>Empresa</label>
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Transmisión -->
+                    <div class="col s12 m3">
+                        <div class="input-field">
+                            <select id="cboTipoDetalle" class="validate" required>
+                                <option value="" disabled selected>Seleccione tipo</option>
+                            </select>
+                            <label>Tipo de Transmisión</label>
+                        </div>
+                    </div>
+
+                    <!-- Desde -->
+                    <div class="col s12 m2">
+                        <div class="input-field">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input type="text" id="transmitirDesde" class="datepicker validate" readonly required>
+                            <label for="transmitirDesde">Desde</label>
+                        </div>
+                    </div>
+
+                    <!-- Hasta -->
+                    <div class="col s12 m2">
+                        <div class="input-field">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input type="text" id="transmitirHasta" class="datepicker validate" readonly required>
+                            <label for="transmitirHasta">Hasta</label>
+                        </div>
+                    </div>
+
+                    <!-- Activo -->
+                    <div class="col s12 m2" style="display:flex; align-items:center; justify-content:flex-start; height:100%;">
+                        <label style="margin:0; display:flex; align-items:center;">
+                            <input type="checkbox" id="chkActivo" checked />
+                            <span>Activo</span>
+                        </label>
+                    </div>
+                </div>
+
+
+
+                <div class="row fila-busqueda">
+                    <!-- Checkbox Activo -->
+                    <div class="col s12 m12">
+                        <!-- Tabla con DataTable -->
+                        @* <div style="flex: 1; padding-left: 20px;"> *@
+                        <table class="highlight responsive-table" id="tblSucusalesDetalle">
+                            <thead>
+                                <tr>
+                                    <th style="width:120px!important; text-align:center;">
+                                        <label style="display:flex; justify-content:center; margin:0;">
+                                            <input type="checkbox" id="chkSeleccionarTodo" />
+                                            <span></span>
+                                        </label>
+                                    </th>
+                                    <th style="width:120px!important">CLAVE</th>
+                                    <th>SUCURSAL</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer del modal: solo botones -->
+        <div class="modal-footer">
+            <a href="#!" class="modal-close btn red lighten-1">Cancelar</a>
+            <a class="btn blue darken-2" id="btnGuardar">Guardar</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="~/js/administracion/transmision.js?v=1.0.1"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // === Inicializar selects ===
+        const selects = document.querySelectorAll('select');
+        M.FormSelect.init(selects);
+
+
+        // === Inicializar datepickers ===
+        const hoy = new Date();
+        const datepickers = document.querySelectorAll('.datepicker');
+        M.Datepicker.init(datepickers, {
+            format: 'dd-mm-yyyy',
+            autoClose: true,
+            maxDate: hoy,
+            container: document.body,
+            showClearBtn: true,
+            defaultDate: hoy,
+            setDefaultDate: true,
+            zIndex: 2000,
+            i18n: {
+                cancel: 'Cancelar',
+                clear: 'Limpiar',
+                done: 'Aceptar',
+                months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                weekdays: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+                weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+            }
+        });
+
+    });
+</script>
+
+
+
+

@@ -1,0 +1,112 @@
+﻿
+@{
+    ViewData["Title"] = "Inventario valuación";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!DOCTYPE html>
+<html lang="es">
+
+<body>
+    <form class="col s12" id="frmDatos" autocomplete="off">
+        <input type="hidden" id="apiBaseUrl" value="@ViewBag.ApiBaseUrl" />
+        <input type="hidden" id="txtUsuario" value="@User.FindFirst("IdUsuario")?.Value" />
+        <input type="hidden" id="txtEmpresaSucursal" value="@User.FindFirst("EmpresaSucursal")?.Value" />
+        <h5>Reporte inventario valuación</h5>
+        <div class="container-fluid">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <div class="row" style="margin-bottom: 0;">
+                        <div class="col s12 m2">
+                            <div class="input-field">
+                                <i class="material-icons prefix">calendar_today</i>
+                                <input type="text" id="reporteDesde" class="datepicker validate" readonly required>
+                                <label for="transmitirDesde">Fecha</label>
+                            </div>
+                        </div>
+
+                        <div class="input-field col s12 m6">
+                            <select id="cboSucursal" multiple>
+                                <option value="0" disabled selected>Tod@s</option>
+                            </select>
+                            <label>Sucursal</label>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="col s12 m4 right-align" style="margin-top: 20px;">
+                            <a href="#!" id="btnBuscar" class="btn blue darken-2 waves-effect waves-light">
+                                <i class="material-icons left">search</i>Buscar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <table id="tblAcumulado" class="striped highlight dataTables_wrapper">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; width:100px!important">Sucursal</th>
+                            <th style="text-align: left; width:450px!important">Nombre Sucursal</th>
+                            <th style="text-align: right;">Ventas</th>
+                            <th style="text-align: right;">Existencias</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="text-align: right;"></th>
+                            <th style="text-align: right;">TOTALES:</th>
+                            <th style="text-align: right;"></th>
+                            <th style="text-align: right;"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+            </div>
+        </div>
+    </form>
+</body>
+</html>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="~/js/administracion/inventarioValuacion.js?v=1.0.1"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // === Inicializar selects ===
+        const selects = document.querySelectorAll('select');
+        M.FormSelect.init(selects);
+        // === Inicializar datepickers ===
+        const hoy = new Date();
+        const minFecha = new Date();
+        // minFecha.setDate(hoy.getDate() - 30);
+        const datepickers = document.querySelectorAll('.datepicker');
+        M.Datepicker.init(datepickers, {
+            format: 'dd-mm-yyyy',
+            autoClose: true,
+            maxDate: hoy,
+            // minDate: minFecha,
+            container: document.body,
+            showClearBtn: true,
+            defaultDate: hoy,
+            setDefaultDate: true,
+            zIndex: 2000,
+            i18n: {
+                cancel: 'Cancelar',
+                clear: 'Limpiar',
+                done: 'Aceptar',
+                months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                weekdays: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                weekdaysShort: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+            }
+        });
+
+    });
+</script>
+
+
+
+

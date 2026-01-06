@@ -1,0 +1,550 @@
+﻿@{
+    string usuario = "Humberto Morales";
+    var empresaSucursal = User.Claims.FirstOrDefault(c => c.Type == "EmpresaSucursal")?.Value;
+
+    bool empresaSucursalVacio =
+        string.IsNullOrWhiteSpace(empresaSucursal) ||
+        empresaSucursal == "[]" ||
+        empresaSucursal == "null" ||
+        empresaSucursal == "[] ";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Materialize y DataTables -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.4.1/css/rowGroup.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.1/css/responsive.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet" />
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        /* Marca de agua */
+        .watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/images/_simiPet.jpg');
+            background-repeat: no-repeat;
+            background-size: cover!important;
+            background-position: center!important;
+            opacity: 0.25;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Asegura que contenido principal, header, footer y sidebar estén por encima */
+        .contentPrincipal,
+        header,
+        footer,
+        .sidenav-fixed {
+            position: relative;
+            z-index: 1;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Sidebar lateral fijo */
+        .sidenav-fixed {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343A40;
+        }
+
+        /* Header */
+        header {
+            border-left: 1px solid #ccc;
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            height: 50px;
+            z-index: 1000;
+            background-color: #343A40;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            color: white;
+            border-bottom: none;
+            box-sizing: border-box;
+        }
+
+            header .divider-vertical {
+                background-color: rgba(255,255,255,0.3);
+            }
+
+            header span {
+                font-weight: 500;
+                color: white;
+            }
+
+        /* Contenido principal */
+        main {
+            flex: 1;
+            margin-left: 250px;
+            margin-top: 50px;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 250px;
+            right: 0;
+            height: 40px;
+            background-color: #f2f2f2;
+            text-align: center;
+            line-height: 40px;
+            z-index: 1000;
+        }
+
+        /* Botón logout */
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: white;
+            text-transform: none;
+        }
+
+            .logout-btn i {
+                color: #ff6b6b;
+                line-height: 1;
+                margin-right: 4px;
+            }
+
+        /* Colores de menús */
+        .menu-seguridad .collapsible-header,
+        .menu-administracion .collapsible-header {
+            color: white;
+        }
+
+        .collapsible-header i {
+            margin-right: 10px;
+        }
+
+        /* Responsive */
+        @@media only screen and (max-width: 992px) {
+            main
+
+        {
+            margin-left: 0;
+            margin-top: 60px;
+            margin-bottom: 40px;
+        }
+
+        header {
+            left: 0;
+        }
+
+        footer {
+            left: 0;
+        }
+
+        .sidenav-fixed {
+            display: none;
+        }
+
+        .sidenav-trigger-btn {
+            display: block !important;
+        }
+
+        }
+
+        .sidenav-trigger-btn {
+            display: none;
+        }
+
+        /* Overlay de carga */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(250, 250, 250, 0.88);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            text-align: center;
+        }
+
+        .mascota-loading {
+            width: 160px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: bounce 1.8s infinite ease-in-out;
+        }
+
+        .preloader-wrapper {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Marca de agua -->
+    <div class="watermark"></div>
+
+    <!-- Sidebar fijo -->
+    <ul class="sidenav sidenav-fixed">
+        <li class="logo-container center" style="padding: 20px 0;">
+            <a href="@Url.Action("Inicio", "Home")">
+                <img src="~/images/logo_soltec.png" alt="Logo" style="height: 60px;">
+            </a>
+        </li>
+        <li><div class="divider" style="margin: 0 10px; width: auto; background-color: rgba(255,255,255,0.2);"></div></li>
+
+        <!-- Seguridad -->
+        @if (empresaSucursalVacio)
+        {
+            @* <li class="menu-seguridad">
+                <ul class="collapsible">
+                    <li>
+                        <div class="collapsible-header"><i class="material-icons">security</i>Seguridad</div>
+                        <div class="collapsible-body">
+                            <ul>
+                                <li><a href="@Url.Action("Usuarios", "Seguridad")">Usuarios</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </li> *@
+        }
+
+        <!-- Administración -->
+        <li class="menu-administracion">
+            <ul class="collapsible">
+                @if (empresaSucursalVacio)
+                {
+                    <li>
+                        <div class="collapsible-header"><i class="material-icons">settings</i>Administración</div>
+                        <div class="collapsible-body">
+                            <ul>
+                                <li><a href="@Url.Action("ConfiguradorHistoricos", "Administracion")">Configurador de Transm.</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                }
+
+                @if (!empresaSucursalVacio)
+                {
+                    <li>
+                        <ul class="collapsible">
+                            <li>
+                                <div class="collapsible-header"><i class="material-icons">bar_chart</i>Reportes Ventas</div>
+                                <div class="collapsible-body">
+                                    <ul>
+                                        <li><a href="@Url.Action("AcumuladoFecha", "Administracion")">Acumulado por Fecha</a></li>
+                                        <li><a href="@Url.Action("PorSucursal", "Administracion")">Por Sucursal</a></li>
+                                        <li><a href="@Url.Action("PorSucursalVendedor", "Administracion")">Por Sucursal vs Vendedor</a></li>
+                                        <li><a href="@Url.Action("PorVendedor", "Administracion")">Por Vendedor</a></li>
+                                        <li><a href="@Url.Action("PorFechaSucursalVendedor", "Administracion")">Por Sucursal detalle</a></li>
+                                        <li><a href="@Url.Action("PorSucursalVendedorProductos", "Administracion")">Productos</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <ul class="collapsible">
+                            <li>
+                                <div class="collapsible-header"><i class="material-icons">bar_chart</i>Reportes Inventarios</div>
+                                <div class="collapsible-body">
+                                    <ul>
+                                        <li><a href="@Url.Action("InventarioDetalle", "Administracion")">Detalle</a></li>
+                                        <li><a href="@Url.Action("InventarioValuacion", "Administracion")">Valuación</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </li>
+    </ul>
+
+    <!-- Header superior -->
+    <header>
+        <span>@User.Identity.Name</span>
+        <div class="divider-vertical"></div>
+        <a href="@Url.Action("Logout", "Account")" class="logout-btn btn-flat">
+            <i class="material-icons">exit_to_app</i>
+            Cerrar Sesión
+        </a>
+    </header>
+
+    <!-- Sidenav móvil -->
+    <ul class="sidenav" id="mobile-demo">
+    <li><a href="@Url.Action("Inicio", "Home")">Portal</a></li>
+    <li><div class="divider"></div></li>
+
+    @* Seguridad *@
+    @if (empresaSucursalVacio)
+    {
+        @* <li><a href="@Url.Action("Usuarios", "Seguridad")">Usuarios</a></li> *@
+    }
+
+    @* Administración *@
+    @if (empresaSucursalVacio)
+    {
+        <li><a href="@Url.Action("ConfiguradorHistoricos", "Administracion")">Configurador de Transm.</a></li>
+    }
+
+    @if (!empresaSucursalVacio)
+    {
+        <li><a class="subheader">Reportes Ventas</a></li>
+        <li><a href="@Url.Action("AcumuladoFecha", "Administracion")">Acumulado por Fecha</a></li>
+        <li><a href="@Url.Action("PorSucursal", "Administracion")">Por Sucursal</a></li>
+        <li><a href="@Url.Action("PorSucursalVendedor", "Administracion")">Por Sucursal vs Vendedor</a></li>
+        <li><a href="@Url.Action("PorVendedor", "Administracion")">Por Vendedor</a></li>
+        <li><a href="@Url.Action("PorFechaSucursalVendedor", "Administracion")">Por Sucursal detalle</a></li>
+        <li><a href="@Url.Action("PorSucursalVendedorProductos", "Administracion")">Productos</a></li>
+
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">Reportes Inventarios</a></li>
+        <li><a href="@Url.Action("InventarioDetalle", "Administracion")">Detalle</a></li>
+        <li><a href="@Url.Action("InventarioValuacion", "Administracion")">Valuación</a></li>
+    }
+</ul>
+
+
+    <!-- Botón hamburguesa móvil -->
+    <a href="#" data-target="mobile-demo" class="sidenav-trigger sidenav-trigger-btn btn-floating btn-small blue darken-2" style="position: fixed; top: 15px; left: 15px; z-index: 1500;">
+        <i class="material-icons">menu</i>
+    </a>
+
+    <!-- Contenido principal -->
+    <main class="contentPrincipal">
+        @RenderBody()
+    </main>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display:none;">
+        <img src="~/images/mascota.gif" class="mascota-loading" alt="Mascota cargando">
+        <div class="preloader-wrapper active">
+            <div class="spinner-layer spinner-blue-only">
+                <div class="circle-clipper left"><div class="circle"></div></div>
+                <div class="gap-patch"><div class="circle"></div></div>
+                <div class="circle-clipper right"><div class="circle"></div></div>
+            </div>
+        </div>
+        <span style="margin-top: 10px; font-size: 1.2rem;">Cargando información, espere un momento...</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>© 2025 - SOLTEC Consultores</footer>
+
+    <!-- Modal sesión -->
+    <div id="session-modal" class="modal">
+        <div class="modal-content center-align">
+            <h5 class="red-text text-darken-2"><strong>Aviso importante</strong></h5>
+            <div class="divider" style="margin:10px 0;"></div>
+            <p style="font-size:1.1rem;">
+                <strong>Tu sesión está a punto de expirar.</strong><br>
+                Tiempo restante:
+                <span id="session-countdown" style="font-weight:bold; font-size:1.3rem; color:#d32f2f;">00:00</span>
+            </p>
+        </div>
+        <div class="modal-footer" style="text-align:center;">
+            <a href="#!" id="continue-session" class="modal-close btn waves-effect waves-light blue lighten-1" style="margin: 0 auto;">
+                Continuar
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/rowgroup/1.4.1/js/dataTables.rowGroup.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.1/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="~/js/site.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var collapsibles = document.querySelectorAll('.collapsible');
+            M.Collapsible.init(collapsibles, { accordion: false });
+
+            document.querySelectorAll('.collapsible-body a').forEach(function (link) {
+                link.addEventListener('click', function (e) { e.stopPropagation(); });
+            });
+
+            var sidenavs = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(sidenavs);
+
+            document.addEventListener('click', function (e) {
+                var mobileSidenav = document.querySelector('#mobile-demo');
+                var instance = M.Sidenav.getInstance(mobileSidenav);
+                if (instance && instance.isOpen && !mobileSidenav.contains(e.target) && !e.target.classList.contains('sidenav-trigger') && !e.target.closest('.sidenav-trigger')) {
+                    instance.close();
+                }
+            });
+        });
+
+        // Sesión
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalElems = document.querySelectorAll('.modal');
+            M.Modal.init(modalElems, { dismissible: false });
+
+            const modalElem = document.getElementById('session-modal');
+            const modalInstance = M.Modal.getInstance(modalElem);
+
+            const sessionTimeOut = @ViewBag.SessionMinutes * 60 * 1000;
+            const warningTime = 1 * 60 * 1000;
+            let countdownTimer, warningTimer, logoutTimer;
+            let remainingSeconds;
+
+            function formatTime(seconds) {
+                const min = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const sec = (seconds % 60).toString().padStart(2, '0');
+                return `${min}:${sec}`;
+            }
+
+            function startCountdown(seconds) {
+                const countdownElem = document.getElementById('session-countdown');
+                remainingSeconds = seconds;
+                countdownElem.textContent = formatTime(remainingSeconds);
+                countdownTimer = setInterval(() => {
+                    remainingSeconds--;
+                    countdownElem.textContent = formatTime(remainingSeconds);
+                    if (remainingSeconds <= 0) clearInterval(countdownTimer);
+                }, 1000);
+            }
+
+            function showWarningModal() {
+                modalInstance.open();
+                startCountdown(Math.floor(warningTime / 1000));
+            }
+
+            function scheduleTimers() {
+                warningTimer = setTimeout(showWarningModal, sessionTimeOut - warningTime);
+                logoutTimer = setTimeout(() => { window.location.href = '/Account/Logout'; }, sessionTimeOut);
+            }
+
+            function resetActivityTimers() {
+                clearTimeout(warningTimer);
+                clearTimeout(logoutTimer);
+                scheduleTimers();
+            }
+
+            ['keydown', 'click', 'scroll'].forEach(evt => { document.addEventListener(evt, resetActivityTimers); });
+            document.getElementById('continue-session').addEventListener('click', () => {
+                resetActivityTimers();
+                modalInstance.close();
+            });
+
+            scheduleTimers();
+        });
+    </script>
+
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const idleTimeLimit = 60000;
+    const imageInterval = 5000;
+
+    const images = [
+       '/images/1.jpeg',
+       '/images/11.jpeg',
+       '/images/15.jpeg',
+       '/images/2.jpeg',
+       '/images/3.jpeg',
+       '/images/4.jpeg',
+       '/images/16.jpeg',
+       '/images/5.jpeg',
+       '/images/12.jpeg',
+       '/images/13.jpeg',
+       '/images/6.jpeg',
+       '/images/7.jpeg',
+       '/images/14.jpeg',
+       '/images/8.jpeg',
+       '/images/9.jpeg',
+       '/images/10.jpeg',
+       '/images/17.jpeg'
+    ];
+
+    let idleTimer = null;
+    let imageTimer = null;
+
+    const overlay = document.getElementById('idle-wallpaper');
+    const img = document.getElementById('idle-image');
+
+    if (!overlay || !img) {
+        console.warn('Idle wallpaper elements not found');
+        return;
+    }
+
+    function startIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(showWallpaper, idleTimeLimit);
+    }
+
+    function showWallpaper() {
+        overlay.style.display = 'block';
+        changeImage();
+        imageTimer = setInterval(changeImage, imageInterval);
+    }
+
+    function hideWallpaper() {
+        overlay.style.display = 'none';
+        clearInterval(imageTimer);
+        startIdleTimer();
+    }
+
+    function changeImage() {
+        const index = Math.floor(Math.random() * images.length);
+        img.src = images[index];
+    }
+
+    ['mousemove', 'keydown', 'mousedown', 'scroll', 'touchstart']
+        .forEach(evt => {
+            document.addEventListener(evt, () => {
+                if (overlay.style.display === 'block') {
+                    hideWallpaper();
+                }
+                startIdleTimer();
+            });
+        });
+
+    startIdleTimer();
+});
+</script>
+
+
+    <div id="idle-wallpaper">
+    <img id="idle-image" />
+</div>
+
+</body>
+</html>
