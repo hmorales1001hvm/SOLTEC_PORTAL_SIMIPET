@@ -150,5 +150,18 @@ namespace SOLTEC.Portal.V2.Controllers
             ViewBag.ApiBaseUrl = apiUrl;
             return View();
         }
+
+        public IActionResult LogAPI()
+        {
+            var monitor = HttpContext.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
+            var options = monitor.Get(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var sessionMinutes = (int)options.ExpireTimeSpan.TotalMinutes;
+            ViewBag.SessionMinutes = sessionMinutes;
+
+            string apiUrl = _configuration["ApiSettings:BaseUrl"];
+            ViewBag.ApiBaseUrl = apiUrl;
+            return View();
+        }
     }
 }

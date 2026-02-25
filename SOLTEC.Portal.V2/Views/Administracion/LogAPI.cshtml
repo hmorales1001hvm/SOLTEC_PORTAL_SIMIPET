@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Visor de LOGs - API AZURE";
+    // Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<input type="hidden" id="apiBaseUrl" value="@ViewBag.ApiBaseUrl" />
+
+<h5>Visor de LOGs - API AZURE</h5>
+<div id="logContainer" class="fullHeightScroll">
+    <!-- Aquí se cargará el log -->
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="~/js/administracion/logger.js?v=1.0.1"></script>
+
+<style>
+    /* Solo para logs, no tocar todo el body */
+    .fullHeightScroll {
+        flex: 1; /* ocupa todo el alto del main */
+        overflow-y: auto; /* scroll vertical */
+        background-color: #1e1e1e;
+        color: #ffffff;
+        padding: 10px;
+        font-family: monospace;
+        white-space: pre-wrap; /* mantiene saltos de línea */
+        box-sizing: border-box;
+        border-radius: 4px;
+    }
+
+        .fullHeightScroll div {
+            margin-bottom: 2px; /* separación entre líneas */
+        }
+</style>

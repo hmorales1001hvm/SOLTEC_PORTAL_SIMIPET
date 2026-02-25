@@ -355,7 +355,7 @@
             const idEmpresa = parseInt($('#cboEmpresa').val()) || 0;
 
 
-            await CargaLista(idEmpresa, 0);
+            //await CargaLista(idEmpresa, 0);
         } catch (error) {
             console.error('Error al actualizar transmisiones:', error);
         } finally {
@@ -958,7 +958,7 @@
 
             const [hh, mm] = hora.split(':').map(Number);
             const tempFecha = new Date();
-            tempFecha.setHours(hh, mm + 30, 0, 0);
+            tempFecha.setHours(hh, mm + 180, 0, 0);
 
             const horaHasta = `${String(tempFecha.getHours()).padStart(2, '0')}:${String(tempFecha.getMinutes()).padStart(2, '0')}`;
             const data = {

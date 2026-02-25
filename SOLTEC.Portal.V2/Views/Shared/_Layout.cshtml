@@ -47,13 +47,35 @@
         }
 
         /* Asegura que contenido principal, header, footer y sidebar estén por encima */
-        .contentPrincipal,
+      /*   .contentPrincipal,
         header,
         footer,
         .sidenav-fixed {
             position: relative;
             z-index: 1;
-        }
+        } */
+
+
+        .contentPrincipal {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 90px); /* Header (50px) + Footer (40px) */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Contenedor de logs o cualquier contenido que deba llenar el main */
+#logContainer, .fullHeightScroll {
+    flex: 1;                 /* Ocupa todo el espacio restante del main */
+    overflow-y: auto;        /* Scroll vertical */
+    background-color: #1e1e1e;
+    color: #ffffff;
+    padding: 10px;
+    font-family: monospace;
+    white-space: pre-wrap;   /* Mantiene saltos de línea */
+    box-sizing: border-box;
+    border-radius: 4px;
+}
 
         body {
             display: flex;
@@ -247,6 +269,7 @@
                         <div class="collapsible-body">
                             <ul>
                                 <li><a href="@Url.Action("ConfiguradorHistoricos", "Administracion")">Configurador de Transm.</a></li>
+                                <li><a href="@Url.Action("LogAPI", "Administracion")">Logs API AZURE</a></li>
                             </ul>
                         </div>
                     </li>
@@ -313,6 +336,7 @@
     @if (empresaSucursalVacio)
     {
         <li><a href="@Url.Action("ConfiguradorHistoricos", "Administracion")">Configurador de Transm.</a></li>
+        <li><a href="@Url.Action("LogAPI", "Administracion")">Logs API AZURE</a></li>
     }
 
     @if (!empresaSucursalVacio)
@@ -476,22 +500,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const images = [
        '/images/1.jpeg',
-       '/images/11.jpeg',
-       '/images/15.jpeg',
        '/images/2.jpeg',
        '/images/3.jpeg',
-       '/images/4.jpeg',
-       '/images/16.jpeg',
-       '/images/5.jpeg',
        '/images/12.jpeg',
-       '/images/13.jpeg',
+       '/images/5.jpeg',
        '/images/6.jpeg',
        '/images/7.jpeg',
-       '/images/14.jpeg',
        '/images/8.jpeg',
        '/images/9.jpeg',
-       '/images/10.jpeg',
-       '/images/17.jpeg'
+       '/images/16.jpeg'
     ];
 
     let idleTimer = null;

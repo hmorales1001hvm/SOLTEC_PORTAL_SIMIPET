@@ -186,7 +186,72 @@ namespace SOLTEC.Portal.API.Controllers
             });
         }
 
+        [HttpGet("LeerSucursalesRemotas")]
+        public async Task<IActionResult> LeerSucursalesRemotas([FromQuery] int? idEmpresa = null)
+        {
+            try
+            {
+                // Tomamos la primera URL de Azure (puedes cambiar a otra si quieres)
+                string baseUrl = "https://soltec2app01-eza2b8b4cggdfuha.eastus2-01.azurewebsites.net/api/";
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(baseUrl);
 
+                // Construimos el endpoint con query string opcional
+                string endpoint = "venta/LecturaSucursales";
+                if (idEmpresa.HasValue)
+                    endpoint += $"?idEmpresa={idEmpresa.Value}";
+
+                var response = await client.GetAsync(endpoint);
+
+                if (!response.IsSuccessStatusCode)
+                    return StatusCode((int)response.StatusCode, $"Error al consultar el endpoint remoto: {response.ReasonPhrase}");
+
+                string jsonContent = await response.Content.ReadAsStringAsync();
+
+                // Deserializamos a Diccionario<string, ConexionSucursal>
+                var sucursales = JsonConvert.DeserializeObject<Dictionary<string, ConexionSucursal>>(jsonContent);
+
+                return Ok(sucursales);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [HttpGet("LeerLogRemoto")]
+        public async Task<IActionResult> LeerLogRemoto()
+        {
+            try
+            {
+                // URL base de tu API que expone LecturaLog
+                string baseUrl = "https://soltec2app01-eza2b8b4cggdfuha.eastus2-01.azurewebsites.net/api/";
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(baseUrl);
+
+                // Endpoint completo
+                string endpoint = "venta/LecturaLog";
+
+                // Hacer GET
+                var response = await client.GetAsync(endpoint);
+
+                if (!response.IsSuccessStatusCode)
+                    return StatusCode((int)response.StatusCode, $"Error al consultar el log remoto: {response.ReasonPhrase}");
+
+                // Leer contenido como texto plano
+                string logContent = await response.Content.ReadAsStringAsync();
+
+                // Opcional: devolverlo tal cual, o dividir en líneas
+                var lineas = logContent.Split(new[] { '\n' }, StringSplitOptions.None);
+
+                return Ok(lineas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
     }
 }
