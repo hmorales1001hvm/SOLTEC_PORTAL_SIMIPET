@@ -12,7 +12,8 @@
 
     $('#cboTipo, #cboTipoDetalle').append(`
     <option value="1">Normal</option>
-    <option value="2">Históricos</option>
+    <option value="2">Históricos (Venta en línea)</option>
+    <option value="3">Históricos (ON DEMAND)</option>
 `);
 
     $('#cboEstatus').append(`

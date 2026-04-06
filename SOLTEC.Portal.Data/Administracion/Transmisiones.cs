@@ -49,7 +49,7 @@ namespace SOLTEC.Portal.Data.Administracion
                 parameter.Add("@pIdUsuario", data.IdUsuario, DbType.Int32);
                 parameter.Add("@pHistorico", data.TipoCarga, DbType.Int32);
                 parameter.Add("@pEstatus", data.Estatus, DbType.String);
-
+                //parameter.Add("@pTipoCarga", data.TipoCarga, DbType.Int32);
 
                 await connection.OpenAsync();
                 _data = (await connection.QueryAsync<ModelTransmisiones>("usp_PortalCargaTransmisionesHistoricos", parameter, commandType: CommandType.StoredProcedure, commandTimeout: 420)).ToList();
@@ -299,28 +299,35 @@ namespace SOLTEC.Portal.Data.Administracion
                 try
                 {
                     await connection.OpenAsync();
+                    var tipoCarga = 0;
+
+                    if (data.TipoCarga == 2 || data.TipoCarga==1)
+                        tipoCarga = 88;
+                    else
+                        tipoCarga = 96;
+
                     foreach (var item in data.ListaSucursales)
-                    {
-                        int esHistorico = (data.TipoCarga == 2) ? 1 : 0;
-                        if (item.Clave.Trim() != "")
                         {
-                            if (item.Seleccionada)
+                            int esHistorico = (data.TipoCarga == 2 || data.TipoCarga == 3) ? 1 : 0;
+                            if (item.Clave.Trim() != "")
                             {
-                                string sqlValidar = @"  SELECT COUNT(*) FROM soltec2_Historicos WHERE ClaveSimi = @Clave AND Activo = 1 
+                                if (item.Seleccionada)
+                                {
+                                    string sqlValidar = @"  SELECT COUNT(*) FROM soltec2_Historicos WHERE ClaveSimi = @Clave AND Activo = 1 
                                                           AND Estatus = 'PENDIENTE'
                                                           AND EsHistorico = @EsHistorico;
 ";
-                                var existe = await connection.ExecuteScalarAsync<int>(sqlValidar, new { item.Clave, EsHistorico = esHistorico });
+                                    var existe = await connection.ExecuteScalarAsync<int>(sqlValidar, new { item.Clave, EsHistorico = esHistorico });
 
-                                var param1 = data.TransmitirDesde.Replace("-","").Replace("-","");
-                                var param2 = data.TransmitirHasta.Replace("-", "").Replace("-", ""); ;
+                                    var param1 = data.TransmitirDesde.Replace("-", "").Replace("-", "");
+                                    var param2 = data.TransmitirHasta.Replace("-", "").Replace("-", ""); ;
 
-                                string sql = string.Empty;
+                                    string sql = string.Empty;
 
-                                if (existe <= 0)
-                                {
-                                    // Inserción
-                                    string sqlInsert = @"
+                                    if (existe <= 0)
+                                    {
+                                        // Inserción
+                                        string sqlInsert = @"
                                                         INSERT INTO soltec2_Historicos 
                                                         (IdSQLScript,
                                                          Desde,
@@ -332,21 +339,22 @@ namespace SOLTEC.Portal.Data.Administracion
                                                          ClaveSimi,
                                                          FechaCreacion)
                                                         VALUES 
-                                                        (88, @Param1, @Param2, @IdUsuario, 'PENDIENTE', 1, @EsHistorico, @Clave, SYSDATE());
+                                                        (@TipoCarga, @Param1, @Param2, @IdUsuario, 'PENDIENTE', 1, @EsHistorico, @Clave, SYSDATE());
                                                     ";
 
-                                    await connection.ExecuteAsync(sqlInsert, new
-                                    {
-                                        Param1 = param1,
-                                        Param2 = param2,
-                                        data.IdUsuario,
-                                        item.Clave,
-                                        EsHistorico = esHistorico
-                                    });
+                                        await connection.ExecuteAsync(sqlInsert, new
+                                        {
+                                            TipoCarga = tipoCarga,
+                                            Param1 = param1,
+                                            Param2 = param2,
+                                            data.IdUsuario,
+                                            item.Clave,
+                                            EsHistorico = esHistorico
+                                        });
+                                    }
                                 }
                             }
                         }
-                    }
                     return new Response<ModelTransmisiones> { Exito = true, Mensaje = "Transmisión guardada correctamente." };
                 }
                 catch (Exception ex)

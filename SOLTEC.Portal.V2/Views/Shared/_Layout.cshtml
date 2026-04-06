@@ -269,7 +269,7 @@
                         <div class="collapsible-body">
                             <ul>
                                 <li><a href="@Url.Action("ConfiguradorHistoricos", "Administracion")">Configurador de Transm.</a></li>
-                                <li><a href="@Url.Action("LogAPI", "Administracion")">Logs API AZURE</a></li>
+                                <li><a href="@Url.Action("UsuariosSIMIPET", "Administracion")">Usuarios SIMIPET</a></li>
                             </ul>
                         </div>
                     </li>
@@ -336,7 +336,8 @@
     @if (empresaSucursalVacio)
     {
         <li><a href="@Url.Action("ConfiguradorHistoricos", "Administracion")">Configurador de Transm.</a></li>
-        <li><a href="@Url.Action("LogAPI", "Administracion")">Logs API AZURE</a></li>
+            <li><a href="@Url.Action("UsuariosSIMIPET", "Administracion")">Usuarios SIMIPET</a></li>
+        @* <li><a href="@Url.Action("LogAPI", "Administracion")">Logs API AZURE</a></li> *@
     }
 
     @if (!empresaSucursalVacio)

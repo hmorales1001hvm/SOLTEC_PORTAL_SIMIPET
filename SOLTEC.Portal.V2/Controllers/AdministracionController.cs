@@ -151,7 +151,7 @@ namespace SOLTEC.Portal.V2.Controllers
             return View();
         }
 
-        public IActionResult LogAPI()
+        public IActionResult UsuariosSIMIPET()
         {
             var monitor = HttpContext.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
             var options = monitor.Get(CookieAuthenticationDefaults.AuthenticationScheme);
